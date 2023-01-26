@@ -4,7 +4,7 @@ library(scales)
 library(plotly)
 library(patchwork)
 
-daily.df <- read_csv("Bill/data/prism_data/daily_data.csv", 
+daily.df <- read_csv("Libraries and Resources/prism/prism data/daily_data.csv", 
                      skip = 10) %>% 
   clean_names()
 
