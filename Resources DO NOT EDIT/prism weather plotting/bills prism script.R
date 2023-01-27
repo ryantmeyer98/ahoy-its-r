@@ -1,10 +1,13 @@
+# LOAD LIBRARIES
 library(tidyverse)
 library(janitor)
 library(scales)
 library(plotly)
 library(patchwork)
 
-daily.df <- read_csv("Libraries and Resources/prism/prism data/daily_data.csv", 
+# READ IN THE DATA 
+daily.df <- 
+  read_csv("Resources DO NOT EDIT/prism weather plotting/prism data/daily_data.csv", 
                      skip = 10) %>% 
   clean_names()
 
