@@ -1,58 +1,21 @@
 library(tidyverse)
 library(janitor)
+<<<<<<< HEAD
 library(scales)
 library(plotly)
 library(patchwork)
 library(lubridate)
+=======
+>>>>>>> parent of 889939f... new data?
 
-daily.df <- read_csv("Bill/data/prism_data/daily_data.csv", 
+daily.df <- read_csv("Bill/data/prism_data/PRISM_ppt_tmin_tmean_tmax_tdmean_vpdmin_vpdmax_provisional_4km_20190101_20221231_40.6765_-88.7846.csv", 
                         skip = 10) %>% 
   clean_names()
 
-# wow This is one way to do it and the second in this list is also really hard...
-# https://stackoverflow.com/questions/42057832/how-to-draw-rainfall-runoff-graph-in-r-using-ggplot
 
-
-rainAx = list(
-  overlaying = "y",
-  side = "right",
-  title = "Rainfall (mm)",
-  #autorange="reversed",
-  range = c(150,0),
-  showgrid=FALSE
-)
-
-date = daily.df$date #dates at daily format, however you can use any temporal resolution
-temp = daily.df$tmean_degrees_c # flow data
-rainfall = daily.df$ppt_mm # rainfall data
-
-plot_ly() %>%
-  add_trace(
-    x=~date, y=~temp,
-    type="scatter", mode="lines", line = list
-    (color = 'black', width = 1, 
-      dash = 'solid'),name ='Temp C') %>%
-  add_trace(
-    x=~date, y=~rainfall,
-    type="bar", yaxis="y2", marker = list
-    (color ="blue",width = 1),name = 'rainfall') %>%
-  layout(title = "Rainfall-Streamflow",xaxis =list
-         (title = "time (daily)"), yaxis=list
-         (title="Temp C",range=c(-25,50)),yaxis2=rainAx)
-
-
-# 3 this might be the better way to do it and used some code that we need to use
-# for Lizas data
-
-
-rain.plot <-  daily.df %>% 
+daily.df %>% 
   ggplot() +
-   geom_bar(aes(x=date, ppt_mm), stat="identity", color="blue")+
-   scale_y_reverse() 
-rain.plot
-
-temp.plot <-  daily.df %>% 
-  ggplot() +
+<<<<<<< HEAD
   geom_line(aes(x=date, tmean_degrees_c), color="red")+
   scale_y_continuous()
 temp.plot
@@ -109,3 +72,7 @@ temp.plot <-  daily.df %>%
             color="black", size = 1.5, alpha=0.5)+
   scale_y_continuous()
 temp.plot
+=======
+  geom_bar(aes(x=date, y=ppt_mm), stat="identity", width = 4) +
+  scale_y_reverse(expand = c(0,0))
+>>>>>>> parent of 889939f... new data?
