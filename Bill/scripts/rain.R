@@ -3,6 +3,7 @@ library(janitor)
 library(scales)
 library(plotly)
 library(patchwork)
+library(lubridate)
 
 daily.df <- read_csv("Bill/data/prism_data/daily_data.csv", 
                         skip = 10) %>% 
@@ -79,3 +80,32 @@ rain.plot + scale_x_date(position = 'top') +
    plot_layout(ncol = 1, heights = c(1,-.4, 5))
 
 
+
+# how to get 30 year average data into the graph
+avg30.df <- read_csv("Bill/data/prism_data/monthly_data.csv",
+                     skip=10) %>% clean_names() %>% 
+  filter(date != "Annual")  %>% 
+  rename(month = date)
+
+# need to create a dataframe for the full set of dates to add points
+avg30_full.df <-  data.frame(date = ymd(seq(as.Date("2019-01-15"), 
+                                              as.Date("2022-12-15"), 
+                                              by = "month"))) %>% 
+  mutate(month = month(date)) %>% 
+  mutate(month = as.character(lubridate::month(month, label = TRUE, abbr = FALSE)))
+
+# now can merge values to the full
+avg30_full.df <- left_join(avg30_full.df, avg30.df, by="month")
+
+daily.df <- full_join(daily.df, avg30_full.df, by = "date",
+                     suffix= c(x="", y="_avg_30yr"))
+
+
+temp.plot <-  daily.df %>% 
+  ggplot() +
+  geom_line(aes(x=date, tmean_degrees_c), color="red")+
+  geom_line(data = daily.df[!is.na(daily.df$tmean_degrees_c_avg_30yr),],
+             aes(x=date, y= tmean_degrees_c_avg_30yr), 
+            color="black", size = 1.5, alpha=0.5)+
+  scale_y_continuous()
+temp.plot
