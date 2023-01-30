@@ -4,14 +4,27 @@ library(janitor)
 library(scales)
 library(plotly)
 library(patchwork)
-library(lubridate)
 
-
-
-# READ IN THE DATA 
-daily.df <- read_csv("Bill/data/prism_data/PRISM_ppt_tmin_tmean_tmax_tdmean_vpdmin_vpdmax_provisional_4km_20190101_20221231_40.6765_-88.7846.csv", 
-                    skip = 10) %>% 
+# READ IN THE DATA ----
+# this is the way to read in
+daily.df <- 
+  read_csv("Resources DO NOT EDIT/prism weather plotting/prism data/daily_data.csv", 
+                     skip = 10) %>% 
   clean_names()
+
+seven.df <- daily.df %>% 
+  mutate(
+    year = year(date),
+    week = week(date)
+  ) %>% 
+  group_by(year, week) %>% 
+  summarize(
+    date = first(date),
+    ppt_mm = sum(ppt_mm, na.rm=TRUE),
+    tmean_degrees_c = mean(tmean_degrees_c, na.rm=TRUE)
+  )
+
+
 
 
 # wow This is one way to do it and the second in this list is also really hard...
@@ -20,7 +33,7 @@ daily.df <- read_csv("Bill/data/prism_data/PRISM_ppt_tmin_tmean_tmax_tdmean_vpdm
 
 rainAx = list(
   overlaying = "y",
-  side = "right",=
+  side = "right",
   title = "Rainfall (mm)",
   #autorange="reversed",
   range = c(150,0),
@@ -49,11 +62,20 @@ plot_ly() %>%
 # 3 this might be the better way to do it and used some code that we need to use
 # for Lizas data
 
-rain.plot <-  daily.df %>% 
+
+rain.plot <-  seven.df %>% 
   ggplot() +
-  geom_bar(aes(x=date, ppt_mm), stat="identity", color="blue")+
-  scale_y_reverse() 
+  geom_bar(aes(x=date, ppt_mm), stat="identity", color="blue", size = .1)+
+  scale_y_reverse()  
 rain.plot
+
+rain.plot <-  seven.df %>% 
+  ggplot() +
+  geom_area (aes(x=date, ppt_mm),  color="blue", size = .1)+
+  scale_y_reverse()  
+rain.plot
+
+ggplotly(rain.plot)
 
 temp.plot <-  daily.df %>% 
   ggplot() +
@@ -61,13 +83,15 @@ temp.plot <-  daily.df %>%
   scale_y_continuous()
 temp.plot
 
+rain.plot +
+  temp.plot +
+  plot_layout(ncol = 1)
 
-rain.plot + scale_x_date(position = 'top') +
-  coord_cartesian(ylim=c(55,0))+
+rain.plot + scale_x_date(position = 'top', expand = c(0,0)) +
+  coord_cartesian(ylim=c(65,0))+
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
-        
         axis.line = element_line(linetype = "solid"),
         axis.ticks = element_line(linetype = "blank"),
         panel.grid.major = element_line(linetype = "blank"),
@@ -81,36 +105,4 @@ rain.plot + scale_x_date(position = 'top') +
     panel.grid.major = element_line(linetype = "blank"),
     panel.grid.minor = element_line(linetype = "blank"),
     panel.background = element_rect(fill = NA))+
-  plot_layout(ncol = 1, heights = c(1,-.4, 5))
-
-
-# how to get 30 year average data into the graph
-avg30.df <- read_csv("Bill/data/prism_data/PRISM_ppt_tmin_tmean_tmax_tdmean_vpdmin_vpdmax_stable_800m_monthly_normals_40.6756_-88.7825.csv",
-                     skip=10) %>% clean_names() %>% 
-  filter(date != "Annual")  %>% 
-  rename(month = date)
-
-# need to create a dataframe for the full set of dates to add points
-avg30_full.df <-  data.frame(date = ymd(seq(as.Date("2019-01-15"), 
-                                              as.Date("2022-12-15"), 
-                                              by = "month"))) %>% 
-  mutate(month = month(date)) %>% 
-  mutate(month = as.character(lubridate::month(month, label = TRUE, abbr = FALSE)))
-
-# now can merge values to the full
-avg30_full.df <- left_join(avg30_full.df, avg30.df, by="month")
-
-daily.df <- full_join(daily.df, avg30_full.df, by = "date",
-                     suffix= c(x="", y="_avg_30yr"))
-
-
-temp.plot <-  daily.df %>% 
-  ggplot() +
-  geom_line(aes(x=date, tmean_degrees_c), color="red")+
-  geom_line(data = daily.df[!is.na(daily.df$tmean_degrees_c_avg_30yr),],
-             aes(x=date, y= tmean_degrees_c_avg_30yr), 
-            color="black", linewidth = 1.5, alpha=0.5)+
-  scale_y_continuous()
-temp.plot
-
-
+  plot_layout(ncol = 1, heights = c(5,-.9, 3))
