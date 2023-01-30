@@ -62,11 +62,11 @@ plot_ly() %>%
 # 3 this might be the better way to do it and used some code that we need to use
 # for Lizas data
 
-
-rain.plot <-  seven.df %>% 
-  ggplot() +
-  geom_bar(aes(x=date, ppt_mm), stat="identity", color="blue", size = .1)+
-  scale_y_reverse()  
+# this creates the rain plot ----
+rain.plot <-  seven.df %>% # this creates a new plot using the df here
+  ggplot() + # starts the plot command
+  geom_bar(aes(x=date, ppt_mm), stat="identity", color="blue", size = .1)+ # makes a bar plot
+  scale_y_reverse()  # reverses the scale
 rain.plot
 
 rain.plot <-  seven.df %>% 
