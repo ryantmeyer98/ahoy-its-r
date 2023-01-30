@@ -5,7 +5,8 @@ library(scales)
 library(plotly)
 library(patchwork)
 
-# READ IN THE DATA 
+# READ IN THE DATA ----
+# this is the way to read in
 daily.df <- 
   read_csv("Resources DO NOT EDIT/prism weather plotting/prism data/daily_data.csv", 
                      skip = 10) %>% 
