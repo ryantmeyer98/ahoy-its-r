@@ -6,11 +6,11 @@ library(janitor)
 
 #import adult emergence dataset and treatment assignments per ovicup
 
-adult_emergence <- read_csv("Resources DO NOT EDIT/kate_data/adult_emergence_weekly.csv")
+adult_emergence <- read_csv("data/adult_emergence_weekly.csv")
 
 #pull the treatment assignments from the output directory
 #this treatment assignments are according to Rachel Morreale
-treatment_assignments <- read_csv("Resources DO NOT EDIT/kate_data/treatment_assignments_RM.csv")
+treatment_assignments <- read_csv("output/treatment_assignments_RM.csv")
 
 #prediction lines from the zero-i-poisson. used in plot 2
 adults_zip <- read_csv("Bill/output/predictions_adults.csv")
