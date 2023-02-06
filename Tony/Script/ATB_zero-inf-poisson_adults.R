@@ -5,6 +5,12 @@ library(rstatix)
 library(pscl)
 library(boot)
 library(readxl)
+library(DHARMa)
+library(lme4)
+
+# DV: n
+#fixed effects: zone
+#Random effects: 
 
 adults <- read_excel("Resources DO NOT EDIT/kate_data/kates complete_adults_KE.xlsx") %>% 
   select(-1)
@@ -29,9 +35,16 @@ adults <- adults %>%
 #run the zero inflated poisson model, week_eclosed treated like a block?
 # how to have zone * week_eclosed interaction?
 # use week as a class variable?
-summary(m1 <- zeroinfl(n ~ zone + week_eclosed, data = adults))
+summary(m1 <- zeroinfl(n ~ zone * week_eclosed, data = adults))
 m1
 
+m2 <- glm(n ~ zone + week_eclosed, family = "poisson", data = adults)
+summary(m2)
+
+Anova(m2, type = "III")
+
+m2_simres <- simulateResiduals(m2)
+plot(m2_simres)
 
   #calculate the null model
 mnull <- update(m1, . ~ 1)
