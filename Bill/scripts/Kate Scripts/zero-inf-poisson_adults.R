@@ -4,9 +4,10 @@ library(ggpubr)
 library(rstatix)
 library(pscl)
 library(boot)
+library(readxl)
 
-
-adults <- read_csv("output/complete_adults.csv")
+adults <- read_excel("Resources DO NOT EDIT/kate_data/kates complete_adults_KE.xlsx") %>% 
+  select(-1)
 
 adults <- adults %>%
   select("ovicup", "week_eclosed", "zone", "n") %>%
@@ -148,5 +149,5 @@ ggplot(newdata1, aes(x = week_eclosed, y = phat, colour = factor(zone))) +
   geom_line() +
   labs(x = "Week_Eclosed", y = "Mean Number of Eclosed Adults", color = "Zone")
 
-write.csv(newdata1, "output/predictions_adults.csv")
+write.csv(newdata1, "Bill/output/predictions_adults.csv")
 

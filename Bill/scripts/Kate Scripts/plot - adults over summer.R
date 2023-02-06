@@ -13,7 +13,7 @@ adult_emergence <- read_csv("data/adult_emergence_weekly.csv")
 treatment_assignments <- read_csv("output/treatment_assignments_RM.csv")
 
 #prediction lines from the zero-i-poisson. used in plot 2
-adults_zip <- read_csv("output/predictions_adults.csv")
+adults_zip <- read_csv("Bill/output/predictions_adults.csv")
 
 
 #combine treatment assignments to the other datasets
