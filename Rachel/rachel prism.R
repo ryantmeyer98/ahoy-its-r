@@ -1,4 +1,3 @@
-# rachels prism script
 # LOAD LIBRARIES
 library(tidyverse)
 library(janitor)
@@ -6,7 +5,8 @@ library(scales)
 library(plotly)
 library(patchwork)
 
-# READ IN THE DATA 
+# READ IN THE DATA ----
+# this is the way to read in
 daily.df <- 
   read_csv("Resources DO NOT EDIT/prism weather plotting/prism data/daily_data.csv", 
            skip = 10) %>% 
@@ -81,3 +81,5 @@ rain.plot + scale_x_date(position = 'top') +
     panel.grid.minor = element_line(linetype = "blank"),
     panel.background = element_rect(fill = NA))+
   plot_layout(ncol = 1, heights = c(1,-.4, 5))
+
+
