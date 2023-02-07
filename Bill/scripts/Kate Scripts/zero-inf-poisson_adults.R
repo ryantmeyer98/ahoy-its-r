@@ -32,6 +32,11 @@ adults <- adults %>%
 summary(m1 <- zeroinfl(n ~ zone + week_eclosed, data = adults))
 m1
 
+adults$ovicup <- as.factor(adults$ovicup)
+
+summary(m2 <- glm(n ~ ovicup:zone * week_eclosed, family="poisson", data=adults))
+m2
+Anova(m2, type=3)
 
   #calculate the null model
 mnull <- update(m1, . ~ 1)
