@@ -30,8 +30,15 @@ one.lm <- lmer(log(n+1) ~ zone * (1|week_eclosed) * (1|zone:ovicup),
                data = complete.df,
                REML = TRUE)
 
+# glmer
+one.lm <- glmer(n ~ zone + (1|week_eclosed) * (1|zone:ovicup),
+                family = poisson,
+                data = complete.df)
+
+summary(one.lm)
+
 # run model 
-Anova(one.lm, type = "3", test.statistic = "F")
+Anova(one.lm, type = "3")
 summary(one.lm)
 
 # random effect
