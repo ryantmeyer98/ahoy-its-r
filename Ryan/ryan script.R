@@ -57,7 +57,13 @@ summary(two.lm)
 # this is how you pull out the random intercepts, still working on it
 ranef(two.lm)
 
-
+# checking assumptions
+# check assumptions 
+residuals <- resid(two.lm)
+plot(fitted(two.lm), residuals)
+qqnorm(residuals)
+qqline(residuals)
+hist(residuals)
 
 
 
@@ -67,12 +73,7 @@ ranef(two.lm)
 # standard error
 # contrasts
 
-# check assumptions 
-residuals <- resid(one.lm)
-plot(fitted(one.lm), residuals)
-qqnorm(residuals)
-qqline(residuals)
-hist(residuals)
+
 
 
 
