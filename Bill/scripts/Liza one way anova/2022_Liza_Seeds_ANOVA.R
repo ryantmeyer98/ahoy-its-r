@@ -18,7 +18,7 @@ library(multcompView)
 library(scales)  
 
 # read file -----
-s.df <- read_excel("Bill/data/Liza one way anova seeds/Field data marvin_2022.xlsx") %>% 
+s.df <- read_excel("Resources DO NOT EDIT/Untitled/Field data marvin_2022.xlsx") %>% 
   clean_names()
 
 # clean up the column names -----
@@ -108,8 +108,7 @@ area.plot <- s.df %>%
 area.plot
 
 # patchwork 
-length.plot +  theme(plot.margin = margin(0, 0, 0, 0, "pt")
-                     )+
+length.plot +  theme(plot.margin = margin(0, 0, 0, 0, "pt"))+
   plot_spacer() + 
   width.plot +  theme(plot.margin = margin(0, 0, 0, 0, "pt"),
     axis.text.y = element_blank(),
@@ -181,7 +180,7 @@ summary(weight_anova.model)
 # yep there is a difference
 
 ## Anova using lm ----
-weight_anova_lm.model <- lm(seed_wt_g  ~ source, data = s.df)
+weight_anova_lm.model <- lm(1/seed_wt_g  ~ source, data = s.df)
 summary(weight_anova_lm.model)
 Anova(weight_anova_lm.model, type=3)
 
@@ -219,7 +218,7 @@ plot(weight_model.emm , comparisons = TRUE)
 ## Pairwise comparisons with emmeans -----
 weight_emm_pairs = emmeans(weight_model.emm, 
                              pairwise ~ source,
-                             adjust="sidak")
+                             adjust="fdr")
 summary(weight_emm_pairs)
 weight_emm_pairs$emmeans
 
@@ -268,7 +267,7 @@ model_means_cld <- model_means_cld %>%
 #   mutate(.group = fct_relevel(source, levels(model_means_cld$.group)))
 
 # base plot setup
-ggplot() +
+fancy.plot <- ggplot() +
   # x-axis
   scale_x_discrete(name = "Source") +
   # black data points
@@ -321,5 +320,29 @@ ggplot() +
                        significantly different by the Sidak-test at the 5% 
                        level of significance.", width = 70)) +
 theme_classic() 
+fancy.plot
+library(plotly)
+ggplotly(fancy.plot)  
 
-  
+
+kruskal.test(seed_wt_g ~ source,
+             data = s.df)
+
+install.packages("FSA")
+library(FSA)
+
+DT = dunnTest(seed_wt_g ~ source,
+              data = s.df,
+              method="bh")      # Adjusts p-values for multiple comparisons;
+DT
+
+
+PT = DT$res
+
+
+# install.packages("rcompanion")
+library(rcompanion)
+
+cldList(P.adj ~ Comparison,
+        data = PT,
+        threshold = 0.05)
