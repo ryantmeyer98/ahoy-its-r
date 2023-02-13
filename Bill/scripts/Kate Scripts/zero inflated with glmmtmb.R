@@ -1,6 +1,6 @@
 
 # install.packages("glmmTMB")
-
+install.packages("DHARMa")
 
 #---- load libraries ----
 library(tidyverse)
@@ -10,7 +10,47 @@ library(pscl)
 library(boot)
 library(readxl)
 library(glmmTMB)
+library(emmeans)
+library(DHARMa)
 
+
+adults.df <- read_excel("Resources DO NOT EDIT/kate_data/kates complete_adults_KE.xlsx") %>% 
+  select(-1)
+
+adults.df <- adults.df %>%
+  select("ovicup", "week_eclosed", "zone", "n") %>%
+  mutate(zone = as.factor(zone))
+
+
+zin.poisson.model = glmmTMB(n ~ zone * week_eclosed + (1|ovicup/zone), #zi=~ovicup * zone,
+               data=adults.df, family=poisson)
+
+summary(zin.poisson.model)
+
+testDispersion(zin.poisson.model)
+simulationOutput <- simulateResiduals(fittedModel = zin.poisson.model, plot = F)
+# residuals(simulationOutput)
+# residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
+plot(simulationOutput)
+
+testDispersion(simulationOutput, alternative == "greater")
+
+emmeans(zin.poisson.model, pairwise ~ zone|week_eclosed)
+
+
+zin.nbinom.model = glmmTMB(n ~ zone * week_eclosed + (1|ovicup/zone), #zi=~ovicup * zone,
+                            data=adults.df, family=nbinom1)
+
+simulationOutput.nbinom <- simulateResiduals(fittedModel = zin.nbinom.model)
+plot(simulationOutput.nbinom)
+
+summary(zin.nbinom.model)
+
+emmeans(zin.nbinom.model, pairwise ~ zone|week_eclosed)
+
+
+
+sal.df <- Salamanders
 
 # Examples from paper
 zinb = glmmTMB(count~spp * mined + (1|site), zi=~spp * mined,
@@ -23,7 +63,6 @@ hnb = glmmTMB(count~spp * mined + (1|site), zi=~spp * mined,
 adults <- read_excel("Resources DO NOT EDIT/kate_data/kates complete_adults_KE.xlsx") %>% 
   select(-1)
 
-adults <- adults %>%
   select("ovicup", "week_eclosed", "zone", "n") %>%
   mutate(zone = as.factor(zone))
 
