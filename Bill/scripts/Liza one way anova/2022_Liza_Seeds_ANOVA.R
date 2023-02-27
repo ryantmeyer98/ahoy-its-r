@@ -2,6 +2,8 @@
 # install.packages("Hmisc")
 # install.packages("multcomp")
 # install.packages("multcompView")
+# install.packages("FSA")
+# install.packages("rcompanion")
 
 # Load libraries -----
 library(tidyverse)
@@ -9,13 +11,13 @@ library(lubridate)
 library(readxl)
 library(patchwork)
 library(janitor)
+library(plotly)
+
 ## Load Anova Specific libraries -----
 library(car)
 library(emmeans)
-library(lme4)
-library(multcomp)
-library(multcompView)
-library(scales)  
+library(FSA)
+library(rcompanion)
 
 # read file -----
 s.df <- read_excel("Resources DO NOT EDIT/Untitled/Field data marvin_2022.xlsx") %>% 
@@ -107,8 +109,11 @@ area.plot <- s.df %>%
   #       axis.ticks.length.y = unit(0, "pt"))
 area.plot
 
-# patchwork 
-length.plot +  theme(plot.margin = margin(0, 0, 0, 0, "pt"))+
+# patchwork combined plot
+# https://stackoverflow.com/questions/70218158/how-to-reduce-the-space-between-to-plots-when-using-patchwork
+# G1 + plot_spacer() + G2 + plot_layout(widths = c(4, -1.1 ,4.5),guides = "collect")& theme(legend.position = "top")
+
+combined.plot <- length.plot +  theme(plot.margin = margin(0, 0, 0, 0, "pt"))+
   plot_spacer() + 
   width.plot +  theme(plot.margin = margin(0, 0, 0, 0, "pt"),
     axis.text.y = element_blank(),
@@ -124,67 +129,25 @@ length.plot +  theme(plot.margin = margin(0, 0, 0, 0, "pt"))+
                      axis.title.y = element_blank(),
                      axis.ticks.length.y = unit(0, "pt"))+
   plot_layout(widths = c(2, -.1, 2, -.1, 2), guides = "collect", ncol = 5)
-  
-# https://stackoverflow.com/questions/70218158/how-to-reduce-the-space-between-to-plots-when-using-patchwork
-# G1 + plot_spacer() + G2 + plot_layout(widths = c(4, -1.1 ,4.5),guides = "collect")& theme(legend.position = "top")
-
-
-# Graph data ------
-weight.plot <- s.df %>% 
-  ggplot(aes(x=source, y = seed_wt_g, 
-             color=source, group = source)) +
-  stat_summary(
-    fun=mean, na.rm = TRUE, geom = "point", size = 3,
-    position = position_dodge(width = 0.2)) +
-  stat_summary(
-    fun.data = mean_se, na.rm = TRUE, geom = "errorbar", width = 0.3,
-    position = position_dodge(width = 0.2)) +
-  theme_light() 
-weight.plot
+combined.plot
 
 ## Save Plot ----
-ggsave(file="output/Weed_weight_plot.pdf", 
-       weight.plot,
-       width = 5, height = 5, 
+ggsave(file="Bill/output/Weed_weight_length_width_plot.pdf", 
+       combined.plot,
+       width = 8, height = 6, 
        units="in")
 
-# Assumptions Tests ------
-## Homogeneity of Variance----
-
-leveneTest(seed_wt_g ~ source,
-           data= s.df)
-
-# Levene's Test for Homogeneity of Variance (center = median)
-#       Df F value Pr(>F)
-# group  9  0.3862 0.9385
-#       80   
-
-bartlett.test(seed_wt_g ~ source,
-           data= s.df)
-
-# Bartlett test of homogeneity of variances
-# 
-# data:  seed_wt_g by source
-# Bartlett's K-squared = 16.786, df = 9, p-value = 0.05217
-
 # ONE-WAY ANOVA -----
-## Anova using aov -----
-weight_anova.model <- aov(seed_wt_g  ~ source, data = s.df)
-summary(weight_anova.model)
-
-# Df Sum Sq Mean Sq F value Pr(>F)    
-# source       9  3.287  0.3652   25.02 <2e-16 ***
-# Residuals   80  1.168  0.0146                   
-# ---
-#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1        
-# yep there is a difference
-
 ## Anova using lm ----
-weight_anova_lm.model <- lm(1/seed_wt_g  ~ source, data = s.df)
+weight_anova_lm.model <- lm(seed_wt_g  ~ source, data = s.df)
 summary(weight_anova_lm.model)
 Anova(weight_anova_lm.model, type=3)
 
-#Checking Assumptions -----
+# Checking Assumptions -----
+# Assumptions Tests ------
+## Homogeneity of Variance----
+leveneTest(seed_wt_g ~ source, data= s.df)
+
 # Checking normality graphically ----
 par(mfrow = c(1,2))  # This code put two plots in the same window
 hist(weight_anova_lm.model$residuals)   # Makes histogram of residuals  
@@ -193,19 +156,11 @@ plot(weight_anova_lm.model, which = 2)   # Makes Q-Q plot
 # Checking homoscedasticity (Homogeneity of variances) -----
 plot(weight_anova_lm.model, which = 1)  # Makes residuals VS fitted plot
 
-
-#or this way 
-qqPlot(weight_anova_lm.model, distribution = "norm")
-
 # Checking normality statistically ----
 shapiro.test(weight_anova_lm.model$residuals)
 
-# Shapiro-Wilk normality test
-# data:  weight_anova_lm.model$residuals
-# W = 0.91646, p-value = 2.39e-05
-
-# SO WE SHOULD STOP HERE AS THE ASSUMPTION IS VIOLATED or not
-# THE CODE BELOW WOULD SSUME THAT RESIDUALS WERE NORMALLY DISTRIBUTED
+# SO WE SHOULD STOP HERE AS THE ASSUMPTION IS VIOLATED ---------
+# THE CODE BELOW WOULD ASSUME THAT RESIDUALS WERE NORMALLY DISTRIBUTED
 # Post Hoc tests ---------
 weight_model.emm <- emmeans(weight_anova_lm.model, ~ source)
 weight_model.emm
@@ -214,15 +169,14 @@ weight_model.emm
 # blue are confidence intervals, red arrows overlap mean no significant diff
 plot(weight_model.emm , comparisons = TRUE)
 
-
 ## Pairwise comparisons with emmeans -----
 weight_emm_pairs = emmeans(weight_model.emm, 
                              pairwise ~ source,
-                             adjust="fdr")
+                             adjust="tukey")
 summary(weight_emm_pairs)
-weight_emm_pairs$emmeans
 
-weight_emm_pairs$contrasts
+# just the emmeans
+weight_emm_pairs$emmeans
 
 ## Pairwise with letters -----
 cld <- multcomp::cld(weight_model.emm,
@@ -235,8 +189,6 @@ cld
 # below re different ways
 # https://broom.tidymodels.org/reference/tidy.emmGrid.html
 # https://broom.tidymodels.org/reference/tidy.summary_emm.html
-
-
 ggplot(data=cld, aes( x= reorder(source, emmean), y = emmean, color = source)) +
   geom_point()+
   geom_errorbar(aes(min = emmean-SE, ymax = emmean+SE), width=0.3) +
@@ -247,7 +199,7 @@ ggplot(data=cld, aes( x= reorder(source, emmean), y = emmean, color = source)) +
 # A different graph and method ----
 # https://schmidtpaul.github.io/DSFAIR/compactletterdisplay.html
 # add letters to each mean
-model_means_cld <- cld(object = weight_model.emm,
+model_means_cld <- multcomp::cld(object = weight_model.emm,
                        adjust = "sidak",
                        Letters = letters,
                        alpha = 0.05)
@@ -321,28 +273,23 @@ fancy.plot <- ggplot() +
                        level of significance.", width = 70)) +
 theme_classic() 
 fancy.plot
-library(plotly)
-ggplotly(fancy.plot)  
 
+# Nonparametric Tests ------
+# If parametric test assumptions are violated and you cant transform data
+# you do non parametric tests
 
-kruskal.test(seed_wt_g ~ source,
-             data = s.df)
+# Kruskal Wallis test ---
+kruskal.test(seed_wt_g ~ source, data = s.df)
 
-install.packages("FSA")
-library(FSA)
-
-DT = dunnTest(seed_wt_g ~ source,
+dunn.test = dunnTest(seed_wt_g ~ source,
               data = s.df,
-              method="bh")      # Adjusts p-values for multiple comparisons;
-DT
+              method="sidak")      # Adjusts p-values for multiple comparisons;
+dunn.test
 
+# get out the resituals
+PT = dunn.test$res
 
-PT = DT$res
-
-
-# install.packages("rcompanion")
-library(rcompanion)
-
+# get compact letter display showing groups ----
 cldList(P.adj ~ Comparison,
         data = PT,
         threshold = 0.05)
