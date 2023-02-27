@@ -1,8 +1,30 @@
 
-install.packages("glmmTMB")
-install.packages("TMB")
-install.packages("bbmle")
+# install.packages("glmmTMB")
+# install.packages("TMB")
+# install.packages("bbmle")
 # install.packages("DHARMa")
+
+# https://github.com/glmmTMB/glmmTMB
+# ## load (installing if necessary) the checkpoint package
+# while (!require("checkpoint")) install.packages("checkpoint")
+# ## retrieve build date of installed version of glmmTMB
+# bd <- as.character(asDateBuilt(
+#   packageDescription("glmmTMB",fields="Built")))
+# oldrepo <- getOption("repos")
+# use_mran_snapshot(bd) ## was setSnapshot() pre-checkpoint v1.0.0
+# install.packages("TMB")
+# options(repos=oldrepo) ## restore original repo
+
+# ## load (installing if necessary) the checkpoint package
+# while (!require("checkpoint")) install.packages("checkpoint")
+# ## retrieve build date of installed version of glmmTMB
+# bd <- as.character(asDateBuilt(
+#   packageDescription("TMB",fields="Built")))
+# oldrepo <- getOption("repos")
+# use_mran_snapshot(bd) ## was setSnapshot() pre-checkpoint v1.0.0
+# install.packages("Matrix")
+# options(repos=oldrepo) ## restore original repo
+
 
 #---- load libraries ----
 library(tidyverse)
@@ -47,6 +69,12 @@ plot(simulationOutput)
 testDispersion(simulationOutput, alternative == "greater")
 
 emmeans(zin.poisson.model, pairwise ~ zone|week_eclosed)
+
+# this is the zero inflation test
+testZeroInflation(zin.poisson.model)
+
+
+
 
 
 zin.nbinom.model = glmmTMB(n ~ zone * week_eclosed + (1|ovicup/zone), #zi=~ovicup * zone,
