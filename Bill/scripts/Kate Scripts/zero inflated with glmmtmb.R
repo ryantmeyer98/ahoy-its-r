@@ -1,6 +1,8 @@
 
-# install.packages("glmmTMB")
-install.packages("DHARMa")
+install.packages("glmmTMB")
+install.packages("TMB")
+install.packages("bbmle")
+# install.packages("DHARMa")
 
 #---- load libraries ----
 library(tidyverse)
@@ -10,8 +12,14 @@ library(pscl)
 library(boot)
 library(readxl)
 library(glmmTMB)
+library(bbmle)
 library(emmeans)
 library(DHARMa)
+library(car)
+
+
+theme_set(theme_bw()+
+            theme(panel.spacing=grid::unit(0,"lines")))
 
 
 adults.df <- read_excel("Resources DO NOT EDIT/kate_data/kates complete_adults_KE.xlsx") %>% 
@@ -26,6 +34,9 @@ zin.poisson.model = glmmTMB(n ~ zone * week_eclosed + (1|ovicup/zone), #zi=~ovic
                data=adults.df, family=poisson)
 
 summary(zin.poisson.model)
+
+glmmTMB:::Anova.glmmTMB(zin.poisson.model, type=3)
+
 
 testDispersion(zin.poisson.model)
 simulationOutput <- simulateResiduals(fittedModel = zin.poisson.model, plot = F)
