@@ -68,7 +68,7 @@ plot(simulationOutput)
 
 testDispersion(simulationOutput, alternative == "greater")
 
-emmeans(zin.poisson.model, pairwise ~ zone|week_eclosed)
+emmeans(zin.poisson.model, pairwise ~ zone:week_eclosed)
 
 # this is the zero inflation test
 testZeroInflation(zin.poisson.model)
