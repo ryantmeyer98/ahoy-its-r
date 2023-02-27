@@ -328,3 +328,5 @@ ggplot() +
                        level of significance.", width = 70)) +
   theme_classic() 
 
+kruskal.test(seed_wt_g ~source, 
+             data=s.df)
