@@ -65,9 +65,6 @@ qqnorm(residuals)
 qqline(residuals)
 hist(residuals)
 
-
-
-
 # expected mean 
 # covariance parameter estimate
 # standard error
