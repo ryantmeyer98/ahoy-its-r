@@ -26,3 +26,5 @@ test.df <- island.df %>%
   na.omit() 
 
 princomp(test.df)
+
+
