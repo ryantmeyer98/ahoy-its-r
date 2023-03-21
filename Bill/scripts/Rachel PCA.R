@@ -1,6 +1,6 @@
 # https://finnstats.com/index.php/2021/05/07/pca/
 
-install.packages("psych")
+# install.packages("psych")
 library(devtools)
 install_github("vqv/ggbiplot")
 library(ggbiplot)
@@ -14,7 +14,7 @@ library(GGally)
 
 i.df <- read_excel("Bill/data/rachel_pca/island_pca.xlsx", na = "NA")
 
-i_pca.df <- i.df %>% select(success, islandsize, distance, predation)
+i_pca.df <- i.df %>% select( islandsize, distance, predation)
 
 pairs.panels(i_pca.df,
              gap = 0,
@@ -26,8 +26,9 @@ ggpairs(i.df,
 
 pc.model <- prcomp(i_pca.df,
              center = TRUE,
-             scale. = TRUE)
-attributes(pc.model)
+             scale = TRUE)
+
+pc.model
 
 print(pc.model)
 
@@ -70,6 +71,10 @@ print(i_biplot)
 # loadings
 pca_loadings <- as.data.frame(pc.model$rotation[,1:2])
 
+
+
+
+
 # PCA data
 pca_axes <- predict(pc.model, newdata = i_pca.df)
 pc_axes.df <- as.data.frame(pca_axes)
@@ -77,8 +82,8 @@ pc_axes.df <- as.data.frame(pca_axes)
 comb.df <- bind_cols(i.df, pc_axes.df)
 
 comb.df %>% 
-  ggplot(aes(PC1, weight_animal)) +
-  geom_point() +
+  ggplot(aes(PC1*-1, weight_animal)) +
+  geom_point(position = position_dodge2(width=0.2)) +
   geom_smooth(method="lm")
 
 lm.model <- lm(weight_animal ~ PC1, data=comb.df)
