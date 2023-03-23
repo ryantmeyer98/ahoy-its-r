@@ -66,14 +66,6 @@ i_biplot <- i_biplot + theme(legend.direction = 'horizontal',
 print(i_biplot)
 
 # now that we have the variation explained by the PCs, lets see what the loading are 
-print(pca.model)
-
-
-
-
-
-
-
 
 # # extract loadings
 # If you use the princomp package you can extract the loadings like this:
@@ -83,51 +75,23 @@ print(pca.model)
 # Loadings <- as.data.frame(PCA$loadings[,1:2])
 
 # If you use prcomp you can do:
-  PCA2 <- prcomp(data)
-  Loadings <- as.data.frame(PCA2$rotation[,1:2])
+#   PCA2 <- prcomp(data)
+#   Loadings <- as.data.frame(PCA2$rotation[,1:2])
 
 # If you use vegan:
 #   PCA3 <- rda(data)
 
-# loadings
-pca_loadings <- as.data.frame(pc.model$rotation[,1:2])
+# loadings table
+#rows, columns
+pca_loadings <- as.data.frame(pca.model$rotation[,1:2])
 
+#look at PCA scores
 # PCA data
-pca_axes <- predict(pc.model, newdata = i_pca.df)
-pc_axes.df <- as.data.frame(pca_axes)
+pca_axes <- predict(pca.model, newdata = i_pca.df)
+pca_axes.df <- as.data.frame(pca_axes)
 
-comb.df <- bind_cols(i.df, pc_axes.df)
-
-comb.df %>% 
-  ggplot(aes(PC1, weight_animal)) +
-  geom_point() +
-  geom_smooth(method="lm")
-
-lm.model <- lm(weight_animal ~ PC1, data=comb.df)
-summary(lm.model)
-
-# With vegan
-# https://ourcodingclub.github.io/tutorials/ordination/#section4
-# https://www.flutterbys.com.au/stats/tut/tut14.2.html
-v.df <- i.df %>% select(sampling_site, success, islandsize, distance, predation) 
-PCA <- rda(v.df[-1], scale=TRUE)
-PCA
-biplot(PCA)
-
-summary(PCA, scaling=2)
+#same as cbind
+comb.df <- bind_cols(i.df, pca_axes.df)
 
 
-barplot(as.vector(PCA$CA$eig)/sum(PCA$CA$eig)) 
-
-
-# Calculate the percent of variance explained by first two axes
-sum((as.vector(PCA$CA$eig)/sum(PCA$CA$eig))[1:2]) # 79%, this is ok.
-# Also try to do it for the first three axes
-
-# Extract scores
-vegan.pca.df <- as.data.frame(PCA$CA$v[,1:2])
-
-# extract data 
-#PC1
-test.df<-  as.data.frame(cbind(PCA$CA$u[,1],PCA$CA$u[,2]))
 
