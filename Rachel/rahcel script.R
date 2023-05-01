@@ -47,7 +47,7 @@ library(GGally)
 
 i.df <- read_excel("Bill/data/rachel_pca/island_pca.xlsx", na = "NA")
 
-i_pca.df <- i.df %>% select(success, islandsize, distance, predation)
+i_pca.df <- i.df %>% select(islandsize, distance, predation)
 
 pairs.panels(i_pca.df,
              gap = 0,
